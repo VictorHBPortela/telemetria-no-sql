@@ -1,0 +1,166 @@
+{
+  "info": {
+    "_postman_id": "bfde4b97-7a78-45db-9811-telemetrianosql",
+    "name": "Telemetria NoSQL - CRUD Completo",
+    "description": "CRUD das cinco collections, variações flexíveis de tarifa, filtros e resolução de alertas. Execute as pastas na ordem apresentada.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "basic",
+    "basic": [
+      { "key": "username", "value": "{{securityUser}}", "type": "string" },
+      { "key": "password", "value": "{{securityPassword}}", "type": "string" }
+    ]
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080" },
+    { "key": "securityUser", "value": "admin" },
+    { "key": "securityPassword", "value": "admin123" },
+    { "key": "tarifaId", "value": "" },
+    { "key": "tarifaBrancaId", "value": "" },
+    { "key": "tarifaDemandaId", "value": "" },
+    { "key": "lojaId", "value": "" },
+    { "key": "medidorId", "value": "" },
+    { "key": "leituraId", "value": "" },
+    { "key": "alertaId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "1 - Criar documentos relacionados",
+      "item": [
+        {
+          "name": "Criar Tarifa Convencional",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Criada', () => pm.response.to.have.status(201));", "pm.collectionVariables.set('tarifaId', pm.response.json().tarifaId);"] } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"codigo\": \"POSTMAN-CONV\",\n  \"nome\": \"Tarifa Postman Convencional\",\n  \"modalidade\": \"CONVENCIONAL\",\n  \"vigenciaInicio\": \"2026-01-01T00:00:00.000Z\",\n  \"vigenciaFim\": \"2026-12-31T23:59:59.000Z\",\n  \"ativa\": true,\n  \"precoKwh\": 0.79\n}" },
+            "url": "{{baseUrl}}/api/tarifas"
+          }
+        },
+        {
+          "name": "Criar Loja",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Criada', () => pm.response.to.have.status(201));", "pm.collectionVariables.set('lojaId', pm.response.json().lojaId);"] } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"nomeLoja\": \"Loja Postman\",\n  \"setor\": \"Demonstração\",\n  \"demandaContratadaKW\": 180,\n  \"tarifaId\": \"{{tarifaId}}\"\n}" },
+            "url": "{{baseUrl}}/api/lojas"
+          }
+        },
+        {
+          "name": "Criar Medidor",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Criado', () => pm.response.to.have.status(201));", "pm.collectionVariables.set('medidorId', pm.response.json().medidorId);"] } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"lojaId\": \"{{lojaId}}\",\n  \"numeroSerie\": \"MED-POSTMAN-001\",\n  \"status\": \"ATIVO\"\n}" },
+            "url": "{{baseUrl}}/api/medidores"
+          }
+        },
+        {
+          "name": "Criar Leitura",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Criada', () => pm.response.to.have.status(201));", "pm.collectionVariables.set('leituraId', pm.response.json().leituraId);"] } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"medidorId\": \"{{medidorId}}\",\n  \"dataHoraLeitura\": \"2026-10-01T10:00:00.000Z\",\n  \"consumoKwh\": 215.5,\n  \"tensaoVolts\": 220,\n  \"correnteAmperes\": 12.4\n}" },
+            "url": "{{baseUrl}}/api/leituras"
+          }
+        },
+        {
+          "name": "Criar Alerta",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Criado', () => pm.response.to.have.status(201));", "pm.collectionVariables.set('alertaId', pm.response.json().alertaId);"] } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"medidorId\": \"{{medidorId}}\",\n  \"tipoAlerta\": \"DEMANDA_EXCEDIDA\",\n  \"mensagem\": \"Consumo acima da demanda contratada\",\n  \"dataHoraAlerta\": \"2026-10-01T10:05:00.000Z\",\n  \"resolvido\": false\n}" },
+            "url": "{{baseUrl}}/api/alertas"
+          }
+        }
+      ]
+    },
+    {
+      "name": "2 - Tarifas e modelo flexível",
+      "item": [
+        { "name": "Listar Tarifas", "request": { "method": "GET", "url": "{{baseUrl}}/api/tarifas" } },
+        { "name": "Buscar Tarifa", "request": { "method": "GET", "url": "{{baseUrl}}/api/tarifas/{{tarifaId}}" } },
+        {
+          "name": "Atualizar Tarifa",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"codigo\": \"POSTMAN-CONV\",\n  \"nome\": \"Tarifa Postman Atualizada\",\n  \"modalidade\": \"CONVENCIONAL\",\n  \"vigenciaInicio\": \"2026-01-01T00:00:00.000Z\",\n  \"vigenciaFim\": \"2026-12-31T23:59:59.000Z\",\n  \"ativa\": true,\n  \"precoKwh\": 0.82\n}" },
+            "url": "{{baseUrl}}/api/tarifas/{{tarifaId}}"
+          }
+        },
+        {
+          "name": "Criar Tarifa Branca",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.collectionVariables.set('tarifaBrancaId', pm.response.json().tarifaId);"] } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"codigo\": \"POSTMAN-BRANCA\",\n  \"nome\": \"Tarifa Postman Branca\",\n  \"modalidade\": \"BRANCA\",\n  \"vigenciaInicio\": \"2026-01-01T00:00:00.000Z\",\n  \"vigenciaFim\": \"2026-12-31T23:59:59.000Z\",\n  \"ativa\": true,\n  \"precosKwh\": { \"foraPonta\": 0.55, \"intermediario\": 0.82, \"ponta\": 1.2 }\n}" },
+            "url": "{{baseUrl}}/api/tarifas"
+          }
+        },
+        {
+          "name": "Criar Tarifa Demanda",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.collectionVariables.set('tarifaDemandaId', pm.response.json().tarifaId);"] } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"codigo\": \"POSTMAN-DEMANDA\",\n  \"nome\": \"Tarifa Postman Demanda\",\n  \"modalidade\": \"DEMANDA\",\n  \"vigenciaInicio\": \"2026-01-01T00:00:00.000Z\",\n  \"vigenciaFim\": \"2026-12-31T23:59:59.000Z\",\n  \"ativa\": true,\n  \"precoKwh\": 0.6,\n  \"precoDemandaKw\": 44\n}" },
+            "url": "{{baseUrl}}/api/tarifas"
+          }
+        }
+      ]
+    },
+    {
+      "name": "3 - Consultar e atualizar recursos",
+      "item": [
+        { "name": "Listar Lojas", "request": { "method": "GET", "url": "{{baseUrl}}/api/lojas" } },
+        { "name": "Buscar Loja", "request": { "method": "GET", "url": "{{baseUrl}}/api/lojas/{{lojaId}}" } },
+        {
+          "name": "Atualizar Loja",
+          "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"nomeLoja\": \"Loja Postman Atualizada\",\n  \"setor\": \"Qualidade\",\n  \"demandaContratadaKW\": 190,\n  \"tarifaId\": \"{{tarifaId}}\"\n}" }, "url": "{{baseUrl}}/api/lojas/{{lojaId}}" }
+        },
+        { "name": "Listar Medidores", "request": { "method": "GET", "url": "{{baseUrl}}/api/medidores" } },
+        { "name": "Buscar Medidor", "request": { "method": "GET", "url": "{{baseUrl}}/api/medidores/{{medidorId}}" } },
+        { "name": "Filtrar Medidores por Loja", "request": { "method": "GET", "url": "{{baseUrl}}/api/medidores/loja/{{lojaId}}" } },
+        {
+          "name": "Atualizar Medidor",
+          "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"lojaId\": \"{{lojaId}}\",\n  \"numeroSerie\": \"MED-POSTMAN-001\",\n  \"status\": \"DESATIVO\"\n}" }, "url": "{{baseUrl}}/api/medidores/{{medidorId}}" }
+        },
+        { "name": "Listar Leituras", "request": { "method": "GET", "url": "{{baseUrl}}/api/leituras" } },
+        { "name": "Buscar Leitura", "request": { "method": "GET", "url": "{{baseUrl}}/api/leituras/{{leituraId}}" } },
+        { "name": "Filtrar Leituras por Medidor", "request": { "method": "GET", "url": "{{baseUrl}}/api/leituras/medidor/{{medidorId}}" } },
+        {
+          "name": "Atualizar Leitura",
+          "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"medidorId\": \"{{medidorId}}\",\n  \"dataHoraLeitura\": \"2026-10-01T10:00:00.000Z\",\n  \"consumoKwh\": 220.75,\n  \"tensaoVolts\": 221,\n  \"correnteAmperes\": 12.8\n}" }, "url": "{{baseUrl}}/api/leituras/{{leituraId}}" }
+        },
+        { "name": "Listar Alertas", "request": { "method": "GET", "url": "{{baseUrl}}/api/alertas" } },
+        { "name": "Buscar Alerta", "request": { "method": "GET", "url": "{{baseUrl}}/api/alertas/{{alertaId}}" } },
+        { "name": "Filtrar Alertas por Medidor", "request": { "method": "GET", "url": "{{baseUrl}}/api/alertas/medidor/{{medidorId}}" } },
+        { "name": "Listar Alertas Não Resolvidos", "request": { "method": "GET", "url": "{{baseUrl}}/api/alertas/nao-resolvidos" } },
+        {
+          "name": "Atualizar Alerta",
+          "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"medidorId\": \"{{medidorId}}\",\n  \"tipoAlerta\": \"DEMANDA_EXCEDIDA\",\n  \"mensagem\": \"Alerta revisado pelo Postman\",\n  \"dataHoraAlerta\": \"2026-10-01T10:05:00.000Z\",\n  \"resolvido\": false\n}" }, "url": "{{baseUrl}}/api/alertas/{{alertaId}}" }
+        },
+        { "name": "Resolver Alerta", "request": { "method": "PATCH", "url": "{{baseUrl}}/api/alertas/{{alertaId}}/resolver" } }
+      ]
+    },
+    {
+      "name": "4 - Excluir em ordem segura",
+      "item": [
+        { "name": "Excluir Alerta", "request": { "method": "DELETE", "url": "{{baseUrl}}/api/alertas/{{alertaId}}" } },
+        { "name": "Excluir Leitura", "request": { "method": "DELETE", "url": "{{baseUrl}}/api/leituras/{{leituraId}}" } },
+        { "name": "Excluir Medidor", "request": { "method": "DELETE", "url": "{{baseUrl}}/api/medidores/{{medidorId}}" } },
+        { "name": "Excluir Loja", "request": { "method": "DELETE", "url": "{{baseUrl}}/api/lojas/{{lojaId}}" } },
+        { "name": "Excluir Tarifa Convencional", "request": { "method": "DELETE", "url": "{{baseUrl}}/api/tarifas/{{tarifaId}}" } },
+        { "name": "Excluir Tarifa Branca", "request": { "method": "DELETE", "url": "{{baseUrl}}/api/tarifas/{{tarifaBrancaId}}" } },
+        { "name": "Excluir Tarifa Demanda", "request": { "method": "DELETE", "url": "{{baseUrl}}/api/tarifas/{{tarifaDemandaId}}" } }
+      ]
+    }
+  ]
+}
