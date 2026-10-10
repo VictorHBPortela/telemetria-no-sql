@@ -149,13 +149,12 @@ O projeto possui dois workflows:
 - `.github/workflows/ci.yml`: dependências reproduzíveis, typecheck, lint,
   testes com MongoDB e validação da imagem;
 - `.github/workflows/cd.yml`: publicação no Azure Container Registry, deploy no
-  slot `staging`, smoke test e promoção para `production` por slot swap.
+  slot `staging`, smoke test, aprovação e deploy da mesma imagem em produção.
 
-As variáveis do GitHub, permissões OIDC e configurações dos slots estão
-documentadas em [`docs/ci-cd.md`](docs/ci-cd.md). O script
-`scripts/provision-azure.sh` cria a infraestrutura e a identidade do pipeline;
-`scripts/configure-azure-app.sh` aplica as configurações segregadas de staging e
-produção.
+As variáveis do GitHub e configurações dos slots estão documentadas em
+[`docs/ci-cd.md`](docs/ci-cd.md). Para simplificar a entrega acadêmica, o CD usa
+as credenciais administrativas do ACR e os publish profiles dos slots,
+armazenados exclusivamente como GitHub Secrets.
 
 ## Gerar o ZIP da entrega
 

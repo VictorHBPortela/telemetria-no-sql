@@ -16,9 +16,7 @@ required=(
   .env.example
   config/staging.env.example
   config/production.env.example
-  scripts/provision-azure.sh
   scripts/smoke-test.sh
-  scripts/configure-azure-app.sh
 )
 
 cd "$repo_root"
