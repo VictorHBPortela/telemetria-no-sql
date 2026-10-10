@@ -1,0 +1,59 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Validar aplicação
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      mongo:
+        image: mongo:8.0
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --quiet --eval 'db.adminCommand({ ping: 1 }).ok'"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+
+    env:
+      MONGODB_URI_TEST: mongodb://127.0.0.1:27017/telemetria_test
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Configurar Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.14
+
+      - name: Instalar dependências reproduzíveis
+        run: bun ci
+
+      - name: Verificar tipos
+        run: bun run typecheck
+
+      - name: Executar lint
+        run: bun run lint
+
+      - name: Executar testes
+        run: bun test --timeout 30000
+
+      - name: Validar imagem de produção
+        run: docker build --target runtime --tag telemetria-no-sql:${{ github.sha }} .

@@ -1,7 +1,6 @@
 services:
   mongo:
     image: mongo:8.0
-    container_name: telemetria-mongo
     restart: unless-stopped
     ports:
       - "${MONGO_PORT:-27018}:27017"
@@ -14,16 +13,18 @@ services:
       retries: 20
 
   app:
-    build: .
-    container_name: telemetria-api
+    build:
+      context: .
+      target: development
     restart: unless-stopped
+    init: true
     environment:
       PORT: 8080
       MONGODB_URI: mongodb://mongo:27017/telemetria
-      SECURITY_USER: ${SECURITY_USER:-admin}
-      SECURITY_PASSWORD: ${SECURITY_PASSWORD:-admin123}
+      SECURITY_USER: ${SECURITY_USER:?Copie .env.example para .env e defina SECURITY_USER}
+      SECURITY_PASSWORD: ${SECURITY_PASSWORD:?Copie .env.example para .env e defina SECURITY_PASSWORD}
     ports:
-      - "8080:8080"
+      - "${PORT:-8080}:8080"
     depends_on:
       mongo:
         condition: service_healthy

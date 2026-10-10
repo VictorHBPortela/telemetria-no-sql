@@ -28,6 +28,7 @@ preços diferente e validada.
 Pré-requisito: Docker Desktop em execução.
 
 ```bash
+cp .env.example .env
 docker compose up --build -d
 docker compose exec app bun run seed
 ```
@@ -69,13 +70,13 @@ conflitos; esse valor pode ser alterado com `MONGO_PORT`.
 ## Autenticação
 
 GET, HEAD e OPTIONS são públicos. POST, PUT, PATCH e DELETE usam HTTP Basic com
-`SECURITY_USER` e `SECURITY_PASSWORD`. Os valores de desenvolvimento do Compose
-são `admin` e `admin123`; substitua-os fora do ambiente local.
+`SECURITY_USER` e `SECURITY_PASSWORD`. O `.env.example` contém apenas valores de
+desenvolvimento; use credenciais diferentes e fortes em staging e produção.
 
 Exemplo de escrita autenticada:
 
 ```bash
-curl -u admin:admin123 \
+curl -u admin:change-me-local \
   -H "Content-Type: application/json" \
   -d '{"codigo":"TAR-NOVA","nome":"Tarifa nova","modalidade":"CONVENCIONAL","vigenciaInicio":"2026-01-01T00:00:00.000Z","vigenciaFim":"2026-12-31T23:59:59.000Z","ativa":true,"precoKwh":0.75}' \
   http://localhost:8080/api/tarifas
@@ -131,8 +132,39 @@ Os testes usam exclusivamente o banco `telemetria_test`, recriam seus dados e
 validam seed idempotente, autenticação, flexibilidade das tarifas, filtros,
 CRUDs completos e bloqueios de integridade.
 
-Com Bun instalado localmente e MongoDB em `localhost:27017`:
+Com Bun instalado localmente e o MongoDB do Compose publicado em `localhost:27018`:
 
 ```bash
-MONGODB_URI_TEST=mongodb://localhost:27017/telemetria_test bun run check
+MONGODB_URI_TEST=mongodb://localhost:27018/telemetria_test bun run check
 ```
+
+## CI/CD e Azure
+
+A aplicação não é implantada como um projeto Node.js nativo. O `Dockerfile`
+usa a imagem oficial do Bun, de modo que o Azure App Service executa um custom
+container com o runtime correto.
+
+O projeto possui dois workflows:
+
+- `.github/workflows/ci.yml`: dependências reproduzíveis, typecheck, lint,
+  testes com MongoDB e validação da imagem;
+- `.github/workflows/cd.yml`: publicação no Azure Container Registry, deploy no
+  slot `staging`, smoke test e promoção para `production` por slot swap.
+
+As variáveis do GitHub, permissões OIDC e configurações dos slots estão
+documentadas em [`docs/ci-cd.md`](docs/ci-cd.md). O script
+`scripts/provision-azure.sh` cria a infraestrutura e a identidade do pipeline;
+`scripts/configure-azure-app.sh` aplica as configurações segregadas de staging e
+produção.
+
+## Gerar o ZIP da entrega
+
+Após commitar e validar o projeto:
+
+```bash
+./scripts/package-delivery.sh
+```
+
+O arquivo `telemetria-no-sql-entrega.zip` conterá o código-fonte, workflows,
+Dockerfile, Compose, scripts, documentação e templates de ambiente, sem incluir
+`.env`, dependências instaladas ou outras credenciais locais.

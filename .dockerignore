@@ -1,5 +1,11 @@
 node_modules
 .git
-.env
+.github
+.env*
+!.env.example
 coverage
 *.log
+*.zip
+docs
+scripts
+telemetria-no-sql.postman_collection.json
