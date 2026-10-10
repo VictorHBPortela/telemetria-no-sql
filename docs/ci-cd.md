@@ -23,7 +23,7 @@ No Portal Azure, abra **TelemetriaFiapRegistry → Settings → Access keys**, a
 **Admin user** e copie o username e um dos passwords. Mantenha essa opção ativa
 enquanto este modelo simplificado estiver em uso.
 
-Em produção, abra o Web App `telemetria-fiap-gtdbb5h7eqgvehe4` e acesse
+Em produção, abra o Web App `telemetria-fiap` e acesse
 **Deployment Center → Settings/Containers**. Configure:
 
 ```text
@@ -78,7 +78,7 @@ Cadastre estas **Repository variables** em
 | Variável | Valor desta entrega |
 | --- | --- |
 | `AZURE_CONTAINER_REGISTRY` | `TelemetriaFiapRegistry` |
-| `AZURE_WEBAPP_NAME` | `telemetria-fiap-gtdbb5h7eqgvehe4` |
+| `AZURE_WEBAPP_NAME` | `telemetria-fiap` |
 | `CONTAINER_IMAGE_NAME` | `telemetria-no-sql` |
 
 Cadastre estes **Repository secrets** em
