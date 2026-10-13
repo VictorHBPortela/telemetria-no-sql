@@ -71,7 +71,12 @@ jobs:
           context: .
           file: ./Dockerfile
           target: runtime
+          platforms: linux/amd64
           push: true
+          provenance: false
+          sbom: false
+          build-args: |
+            BUILD_SHA=${{ env.IMAGE_TAG }}
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
@@ -86,7 +91,7 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
 
       - name: Validar staging
-        run: ./scripts/smoke-test.sh "${{ steps.deploy-staging.outputs.webapp-url }}"
+        run: ./scripts/smoke-test.sh "${{ steps.deploy-staging.outputs.webapp-url }}" "${{ env.IMAGE_TAG }}"
 
   promote-production:
     name: Promover para produção
@@ -120,4 +125,4 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
 
       - name: Validar produção
-        run: ./scripts/smoke-test.sh "${{ steps.deploy-production.outputs.webapp-url }}"
+        run: ./scripts/smoke-test.sh "${{ steps.deploy-production.outputs.webapp-url }}" "${{ env.IMAGE_TAG }}"

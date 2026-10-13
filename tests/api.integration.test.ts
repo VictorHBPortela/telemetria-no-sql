@@ -24,6 +24,7 @@ const testConfig: AppConfig = {
   mongodbUri: Bun.env.MONGODB_URI_TEST ?? "mongodb://localhost:27017/telemetria_test",
   securityUser: "integration-user",
   securityPassword: "integration-password",
+  version: "integration-test",
 };
 
 const authHeader = `Basic ${Buffer.from(
@@ -87,9 +88,10 @@ describe("API de telemetria NoSQL", () => {
     expect(firstSeed).toEqual({ tarifas: 10, lojas: 10, medidores: 10, leituras: 10, alertas: 10 });
     expect(secondSeed).toEqual(firstSeed);
 
-    const health = await request<{ status: string }>("/health");
+    const health = await request<{ status: string; version: string }>("/health");
     expect(health.status).toBe(200);
     expect(requireBody(health).status).toBe("UP");
+    expect(requireBody(health).version).toBe("integration-test");
 
     const publicTarifas = await request<TarifaResponse[]>("/api/tarifas");
     expect(publicTarifas.status).toBe(200);

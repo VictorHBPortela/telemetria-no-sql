@@ -23,8 +23,10 @@ EXPOSE 8080
 CMD ["bun", "run", "start"]
 
 FROM base AS runtime
+ARG BUILD_SHA=development
 ENV NODE_ENV=production \
-    PORT=8080
+    PORT=8080 \
+    APP_VERSION=${BUILD_SHA}
 COPY --from=production-dependencies /app/node_modules ./node_modules
 COPY --chown=bun:bun package.json bun.lock ./
 COPY --chown=bun:bun src ./src

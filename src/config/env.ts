@@ -11,6 +11,7 @@ export interface AppConfig {
   mongodbUri: string;
   securityUser: string;
   securityPassword: string;
+  version: string;
 }
 
 export const loadConfig = (): AppConfig => ({
@@ -18,4 +19,5 @@ export const loadConfig = (): AppConfig => ({
   mongodbUri: Bun.env.MONGODB_URI ?? "mongodb://localhost:27017/telemetria",
   securityUser: Bun.env.SECURITY_USER ?? "admin",
   securityPassword: Bun.env.SECURITY_PASSWORD ?? "admin123",
+  version: Bun.env.APP_VERSION ?? "development",
 });

@@ -9,7 +9,7 @@ import { createHealthRouter, createRouter } from "./routes.ts";
 
 export const createApp = (config: AppConfig): Koa => {
   const app = new Koa();
-  const healthRouter = createHealthRouter();
+  const healthRouter = createHealthRouter(config.version);
   const apiRouter = createRouter(createControllers());
 
   app.use(errorMiddleware);

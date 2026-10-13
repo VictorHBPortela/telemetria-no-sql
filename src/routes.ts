@@ -55,12 +55,16 @@ export const createRouter = (controllers: Controllers): Router => {
   return router;
 };
 
-export const createHealthRouter = (): Router => {
+export const createHealthRouter = (version: string): Router => {
   const router = new Router();
   router.get("/health", (context) => {
     const connected = databaseIsReady();
     context.status = connected ? 200 : 503;
-    context.body = { status: connected ? "UP" : "DOWN", mongodb: connected ? "UP" : "DOWN" };
+    context.body = {
+      status: connected ? "UP" : "DOWN",
+      mongodb: connected ? "UP" : "DOWN",
+      version,
+    };
   });
   return router;
 };
